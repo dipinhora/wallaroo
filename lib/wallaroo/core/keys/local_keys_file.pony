@@ -47,11 +47,13 @@ class LocalKeysFile
   =>
     _writer = Writer
     _filepath = fpath
+    @printf[I32]("SLF: LocalKeysFile async'ed with %s\n".cstring(), _filepath.path.cstring())
     _file = recover iso AsyncJournalledFile(_filepath, the_journal, auth,
       do_local_file_io) end
 
   fun ref add_key(state_name: StateName, k: Key, checkpoint_id: CheckpointId)
   =>
+    @printf[I32]("SLF: LocalKeysFile add_key %s\n".cstring(), k.cstring())
     let payload_size = 4 + state_name.size() + 4 + k.size()
 
     _writer.u8(LocalKeysFileCommand.add())
@@ -65,6 +67,7 @@ class LocalKeysFile
     _file.writev(_writer.done())
 
   fun ref remove_key(state_name: StateName, k: Key, checkpoint_id: CheckpointId) =>
+    @printf[I32]("SLF: LocalKeysFile remove_key %s\n".cstring(), k.cstring())
     let payload_size = 4 + state_name.size() + 4 + k.size()
 
     _writer.u8(LocalKeysFileCommand.remove())

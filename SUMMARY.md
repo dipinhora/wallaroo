@@ -78,6 +78,8 @@
 * [Running Wallaroo](/book/running-wallaroo/running-wallaroo.md)
 * [Autoscale](/book/running-wallaroo/autoscale.md)
 * [Resilience](/book/running-wallaroo/resilience.md)
+  * [Crash Resilience](/book/running-wallaroo/resilience-crash.md)
+  * [Data Redundancy](/book/running-wallaroo/resilience-data-redundancy.md)
 * [Command line options](/book/running-wallaroo/wallaroo-command-line-options.md)
 
 ## Appendix
