@@ -111,7 +111,7 @@ class ConnectorSourceNotify[In: Any val]
           end
           if decoded isnt None then
             _runner.run[In](_pipeline_name, pipeline_time_spent, decoded,
-              "connector-source-key", _source_id, source, _router,
+              "connector-source-key", ingest_ts, _source_id, source, _router,
               _msg_id_gen(), None, decode_end_ts,
               latest_metrics_id, ingest_ts, _metrics_reporter)
           else
