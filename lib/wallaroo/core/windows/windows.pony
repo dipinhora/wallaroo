@@ -238,7 +238,9 @@ class TumblingWindows[In: Any val, Out: Any val, Acc: State ref] is
     // Should we ensure the event_ts is in the correct range?
 
     if event_ts >= earliest_ts then
-      let window_idx = ((event_ts - earliest_ts) / _range).usize()
+      let window_idx_offset = ((event_ts - earliest_ts) / _range).usize()
+      let window_idx =
+        (_earliest_window_idx + window_idx_offset) % _windows.size()
       try
         @printf[I32]("!@ 1\n".cstring())
         @printf[I32]("!@ Applying input to window idx %s, which is %s\n".cstring(), window_idx.string().cstring(), _windows_start_ts(window_idx)?.string().cstring())
@@ -308,6 +310,7 @@ class TumblingWindows[In: Any val, Out: Any val, Acc: State ref] is
         stopped = false
         @printf[I32]("!@ Dropping window for %s\n".cstring(), earliest_ts.string().cstring())
         _earliest_window_idx = (_earliest_window_idx + 1) % _windows.size()
+        @printf[I32]("!@ -- new earliest window idx: %s\n".cstring(), _earliest_window_idx.string().cstring())
       end
     else
       Fail()

@@ -62,12 +62,12 @@ class iso _TestTumblingWindows is UnitTest
     h.assert_eq[USize](res.size(), 0)
 
 
-    res = tw(10, Seconds(109), Seconds(111))
+    res = tw(10, Seconds(110), Seconds(111))
     h.assert_eq[USize](res.size(), 1)
-    h.assert_eq[USize](res(0)?, 15)
-    tw(20, Seconds(109), Seconds(112))
-    tw(30, Seconds(109), Seconds(113))
-    tw(40, Seconds(109), Seconds(114))
+    h.assert_eq[USize](res(0)?, 14)
+    tw(20, Seconds(111), Seconds(112))
+    tw(30, Seconds(112), Seconds(113))
+    tw(40, Seconds(113), Seconds(114))
 
     res = tw(1, Seconds(200), Seconds(201))
     h.assert_eq[USize](res.size(), 2)
