@@ -30,6 +30,7 @@ use initialization = "core/initialization"
 use recovery = "ent/recovery"
 use spike = "ent/spike"
 use topology = "core/topology"
+use windows = "core/windows"
 
 actor Main is TestList
   new create(env: Env) =>
@@ -39,9 +40,11 @@ actor Main is TestList
     None
 
   fun tag tests(test: PonyTest) =>
-    cluster_manager.Main.make().tests(test)
-    data_channel.Main.make().tests(test)
-    initialization.Main.make().tests(test)
-    recovery.Main.make().tests(test)
-    spike.Main.make().tests(test)
-    topology.Main.make().tests(test)
+    //!@
+    // cluster_manager.Main.make().tests(test)
+    // data_channel.Main.make().tests(test)
+    // initialization.Main.make().tests(test)
+    // recovery.Main.make().tests(test)
+    // spike.Main.make().tests(test)
+    // topology.Main.make().tests(test)
+    windows.Main.make().tests(test)

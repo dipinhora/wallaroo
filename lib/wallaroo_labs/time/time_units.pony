@@ -16,16 +16,45 @@ Copyright 2018 The Wallaroo Authors.
 
 */
 
+primitive Nanoseconds
+  fun apply(x: USize): U64 =>
+    """
+    Return in nanoseconds
+    """
+    x.u64()
+
+primitive Microseconds
+  fun apply(x: USize): U64 =>
+    """
+    Return in nanoseconds
+    """
+    Nanoseconds(x) * 1_000
+
+primitive Milliseconds
+  fun apply(x: USize): U64 =>
+    """
+    Return in nanoseconds
+    """
+    Microseconds(x) * 1_000
+
 primitive Seconds
   fun apply(x: USize): U64 =>
     """
     Return in nanoseconds
     """
-    (x * 1_000_000_000).u64()
+    Milliseconds(x) * 1_000
 
 primitive Minutes
   fun apply(x: USize): U64 =>
     """
     Return in nanoseconds
     """
-    60 * Seconds(x)
+    Seconds(x) * 60
+
+primitive Hours
+  fun apply(x: USize): U64 =>
+    """
+    Return in nanoseconds
+    """
+    Minutes(x) * 60
+

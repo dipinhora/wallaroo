@@ -165,7 +165,8 @@ class TumblingWindows[In: Any val, Out: Any val, Acc: State ref] is
   let _range: U64
   let _delay: U64
 
-  new create(key: Key, agg: Aggregation[In, Out, Acc], range: U64, delay: U64)
+  new create(key: Key, agg: Aggregation[In, Out, Acc], range: U64, delay: U64,
+    current_ts: U64 = Time.nanos())
   =>
     _key = key
     _agg = agg
@@ -173,6 +174,8 @@ class TumblingWindows[In: Any val, Out: Any val, Acc: State ref] is
     // Normalize delay to units of range. Since we are using tumbling windows,
     // this simplifies calculations.
     let delay_range_units = (delay.f64() / range.f64()).ceil()
+    @printf[I32]("!@ delay_range_units: %s\n".cstring(), delay_range_units.string().cstring())
+    // let delay_range_units = delay / range
     _delay = range * delay_range_units.u64()
     // Calculate how many windows we need. The delay tells us how long we
     // wait after the close of a window to trigger and clear it. We need
@@ -182,8 +185,8 @@ class TumblingWindows[In: Any val, Out: Any val, Acc: State ref] is
     _windows = Array[(Acc | EmptyWindow)](window_count)
     _windows_start_ts = Array[U64](window_count)
     _earliest_window_idx = 0
-    let current_ts = Time.nanos()
     var window_start: U64 = current_ts - (range * window_count.u64())
+    @printf[I32]("!@ window_start: %s\n".cstring(), window_start.string().cstring())
     for i in Range(0, window_count) do
       _windows.push(EmptyWindow)
       _windows_start_ts.push(window_start)
@@ -193,9 +196,12 @@ class TumblingWindows[In: Any val, Out: Any val, Acc: State ref] is
   fun ref apply(input: In, event_ts: U64, wall_time: U64): Array[Out] val =>
     try
       let earliest_ts = _windows_start_ts(_earliest_window_idx)?
+      @printf[I32]("!@ apply: earliest_ts: %s\n".cstring(), earliest_ts.string().cstring())
       let end_ts = earliest_ts + (_windows.size().u64() * _range)
+      @printf[I32]("!@ apply: end_ts: %s\n".cstring(), end_ts.string().cstring())
       var applied = false
       if (event_ts >= earliest_ts) and (event_ts < end_ts) then
+        @printf[I32]("!@ Applying before\n".cstring())
         _apply_input(input, event_ts, earliest_ts)
         applied = true
       end
@@ -205,6 +211,7 @@ class TumblingWindows[In: Any val, Out: Any val, Acc: State ref] is
 
       // If we haven't already applied the input, do it now.
       if not applied and _is_valid_ts(event_ts, wall_time) then
+        @printf[I32]("!@ Wasn't applied, so applying late\n".cstring())
         let new_earliest_ts = _windows_start_ts(_earliest_window_idx)?
         _apply_input(input, event_ts, new_earliest_ts)
       end
@@ -230,18 +237,31 @@ class TumblingWindows[In: Any val, Out: Any val, Acc: State ref] is
   fun ref _apply_input(input: In, event_ts: U64, earliest_ts: U64) =>
     // Should we ensure the event_ts is in the correct range?
 
-    let window_idx = ((event_ts - earliest_ts) / _range).usize()
-    try
-      match _windows(window_idx)?
-      | let ew: EmptyWindow =>
-        let acc = _agg.initial_accumulator()
-        _agg.update(input, acc)
-        _windows(window_idx)? = acc
-      | let acc: Acc =>
-        _agg.update(input, acc)
+    if event_ts >= earliest_ts then
+      let window_idx = ((event_ts - earliest_ts) / _range).usize()
+      try
+        @printf[I32]("!@ 1\n".cstring())
+        @printf[I32]("!@ Applying input to window idx %s, which is %s\n".cstring(), window_idx.string().cstring(), _windows_start_ts(window_idx)?.string().cstring())
+        match _windows(window_idx)?
+        | let ew: EmptyWindow =>
+          let acc = _agg.initial_accumulator()
+          _agg.update(input, acc)
+          @printf[I32]("!@ 2\n".cstring())
+          _windows(window_idx)? = acc
+        | let acc: Acc =>
+          @printf[I32]("!@ 3\n".cstring())
+          _agg.update(input, acc)
+        end
+        @printf[I32]("!@ 4\n".cstring())
+
+      else
+        Fail()
       end
     else
-      Fail()
+      //!@
+      ifdef debug then
+        @printf[I32]("!@Event ts %s is earlier than earliest window %s. Ignoring\n".cstring(), event_ts.string().cstring(), earliest_ts.string().cstring())
+      end
     end
 
   fun ref _attempt_to_trigger(wall_time: U64): Array[Out] val =>
@@ -286,10 +306,16 @@ class TumblingWindows[In: Any val, Out: Any val, Acc: State ref] is
             all_window_range
         end
         stopped = false
+        @printf[I32]("!@ Dropping window for %s\n".cstring(), earliest_ts.string().cstring())
         _earliest_window_idx = (_earliest_window_idx + 1) % _windows.size()
       end
     else
       Fail()
+    end
+    //!@
+    match out
+    | let o: Out => @printf[I32]("!@ Triggering value!\n".cstring())
+    else @printf[I32]("!@ Triggering empty window!\n".cstring())
     end
     (out, stopped)
 
