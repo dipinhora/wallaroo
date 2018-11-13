@@ -227,7 +227,9 @@ actor TCPSink is Sink
       @printf[I32]("Rcvd msg at TCPSink\n".cstring())
     end
     try
+      @printf[I32]("!@ Hi\n".cstring())
       let encoded = _encoder.encode[D](data, _wb)?
+      @printf[I32]("!@ Hi2\n".cstring())
 
       let next_seq_id = (_seq_id = _seq_id + 1)
       _writev(encoded, next_seq_id)

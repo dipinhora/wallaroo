@@ -35,5 +35,6 @@ class val TypedTCPEncoderWrapper[In: Any val] is TCPEncoderWrapper
     | let i: In =>
       _encoder(i, wb)
     else
+      @printf[I32]("!@ WRONG INPUT TO ENCODER!\n".cstring())
       error
     end
