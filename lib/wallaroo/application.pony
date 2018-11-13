@@ -51,7 +51,7 @@ primitive Wallaroo
       FatalUserError("A pipeline must terminate in a sink!")
     end
 
-  fun window(range: U64): WindowsBuilder =>
+  fun range_windows(range: U64): WindowsBuilder =>
     WindowsBuilder(where range = range)
 
 trait BasicPipeline
