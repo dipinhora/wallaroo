@@ -21,9 +21,9 @@ use "wallaroo"
 use "wallaroo/core/source"
 
 class val GenSourceConfig[In: Any val]
-  let _gen: GenSourceGenerator[In]
+  let _gen: GenSourceGeneratorBuilder[In]
 
-  new val create(gen: GenSourceGenerator[In]) =>
+  new val create(gen: GenSourceGeneratorBuilder[In]) =>
     _gen = gen
 
   fun source_listener_builder_builder(): GenSourceListenerBuilderBuilder[In] =>
