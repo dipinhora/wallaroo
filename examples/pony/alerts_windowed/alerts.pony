@@ -37,7 +37,7 @@ actor Main
 
         transactions
           .key_by(ExtractUser)
-          .to[Alert](Wallaroo.window(Minutes(5))
+          .to[Alert](Wallaroo.window(Seconds(5))
                       .over[Transaction, Alert, TransactionTotal](
                         TotalAggregation))
           // .to[Alert](TotalAggregation)
@@ -150,7 +150,6 @@ primitive TotalAggregation is
 
 primitive AlertsEncoder
   fun apply(alert: Alert, wb: Writer): Array[ByteSeq] val =>
-    @printf[I32]("!@ -- Result: %s\n".cstring(), alert.string().cstring())
     wb.write(alert.string())
     wb.done()
 

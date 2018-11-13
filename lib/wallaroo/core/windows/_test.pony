@@ -43,6 +43,7 @@ class iso _TestTumblingWindows is UnitTest
 
     var res: Array[USize] val = recover Array[USize] end
 
+    // First window's data
     res = tw(2, Seconds(96), Seconds(101))
     h.assert_eq[USize](res.size(), 0)
     res = tw(3, Seconds(97), Seconds(102))
@@ -52,6 +53,7 @@ class iso _TestTumblingWindows is UnitTest
     res = tw(5, Seconds(99), Seconds(104))
     h.assert_eq[USize](res.size(), 0)
 
+    // Second window's data
     res = tw(1, Seconds(105), Seconds(106))
     h.assert_eq[USize](res.size(), 0)
     res = tw(2, Seconds(106), Seconds(107))
@@ -61,7 +63,8 @@ class iso _TestTumblingWindows is UnitTest
     res = tw(4, Seconds(108), Seconds(109))
     h.assert_eq[USize](res.size(), 0)
 
-
+    // Third window's data. This first message should trigger
+    // first window.
     res = tw(10, Seconds(110), Seconds(111))
     h.assert_eq[USize](res.size(), 1)
     h.assert_eq[USize](res(0)?, 14)
@@ -69,6 +72,7 @@ class iso _TestTumblingWindows is UnitTest
     tw(30, Seconds(112), Seconds(113))
     tw(40, Seconds(113), Seconds(114))
 
+    // Use this message to trigger windows 2 and 3
     res = tw(1, Seconds(200), Seconds(201))
     h.assert_eq[USize](res.size(), 2)
     h.assert_eq[USize](res(0)?, 10)
@@ -82,7 +86,6 @@ class _Total is State
 class _Sum is Aggregation[USize, USize, _Total]
   fun initial_accumulator(): _Total => _Total
   fun update(input: USize, acc: _Total) =>
-    @printf[I32]("!@ Adding %s to total %s\n".cstring(), input.string().cstring(), acc.v.string().cstring())
     acc.v = acc.v + input
   fun combine(acc1: _Total, acc2: _Total): _Total =>
     let new_t = _Total
