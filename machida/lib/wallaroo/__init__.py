@@ -175,6 +175,7 @@ def _validate_arity_compatability(name, obj, arity):
 
 
 def _validate_aggregation(agg_cls):
+    ## TODO: add arity validation on these methods
     if not hasattr(agg_cls, 'initial_accumulator'):
         print("\nAPI_Error: Aggregation must have method 'initial_accumulator'.")
         raise WallarooParameterError()
@@ -435,6 +436,19 @@ def state_computation_multi(name, state):
         return C()
     return wrapped
 
+
+## I don't think we need a decorator pattern here.
+## I would expect something more like:
+#
+# class Aggregation(object):
+#     def name(self): self.__class__.__name__ # name
+#     def __init__(self): raise NotImplementedError # initial_accumulator()
+#     def update(self, data, accumulator): raise NotImplementedError # update(data, accumulator)
+#     def combine(self, accumulator1, accumulator2): raise NotImplementedError # combine(acc1, acc2)
+#     def output(self, key, accumulator): raise NotImplementedError # output(key, acc)
+#
+# And we would do arity validation on the methods
+# basically I expect to treat this as a special case of a state object.
 
 def aggregation(name):
     def wrapped(agg_class):
